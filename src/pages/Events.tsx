@@ -5,18 +5,27 @@ import { Input } from '@/components/ui/input';
 import { Search, Filter } from 'lucide-react';
 import Layout from '@/components/Layout';
 import EventCard from '@/components/EventCard';
-import { db } from '@/lib/database';
+import { api } from '@/lib/api';
 import { Event } from '@/types';
 
 const EventsPage = () => {
   const [events, setEvents] = useState<Event[]>([]);
   const [searchTerm, setSearchTerm] = useState('');
   const [activeTab, setActiveTab] = useState('upcoming');
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    // Initialize dummy data and load events
-    db.initializeDummyData();
-    setEvents(db.getEvents());
+    const fetchEvents = async () => {
+      try {
+        const response = await api.events.getAll();
+        setEvents(response.events);
+      } catch (error) {
+        console.error('Error fetching events:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchEvents();
   }, []);
 
   const filteredEvents = events.filter(event => {

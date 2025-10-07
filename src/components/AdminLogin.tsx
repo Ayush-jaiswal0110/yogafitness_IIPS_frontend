@@ -38,18 +38,14 @@ const AdminLogin = ({ onLogin }: AdminLoginProps) => {
     setIsLoading(true);
     setError('');
 
-    // Simulate loading delay
-    await new Promise(resolve => setTimeout(resolve, 1000));
-
-    const success = AuthService.login(data.email, data.password);
-    
-    if (success) {
+    try {
+      await AuthService.login(data.email, data.password);
       onLogin();
-    } else {
-      setError('Invalid email or password. Please check your credentials.');
+    } catch (err: any) {
+      setError(err.message || 'Invalid email or password. Please check your credentials.');
+    } finally {
+      setIsLoading(false);
     }
-    
-    setIsLoading(false);
   };
 
   return (

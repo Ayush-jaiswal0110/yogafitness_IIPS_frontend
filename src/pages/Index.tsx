@@ -1,4 +1,4 @@
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
@@ -6,13 +6,22 @@ import { Badge } from '@/components/ui/badge';
 import { Heart, Target, Eye, Users, Calendar, Award } from 'lucide-react';
 import Layout from '@/components/Layout';
 import EventCard from '@/components/EventCard';
-import { db } from '@/lib/database';
-import { Faculty } from '@/types';
+import { api } from '@/lib/api';
+import { Faculty, Event } from '@/types';
 
 const HomePage = () => {
+  const [upcomingEvents, setUpcomingEvents] = useState<Event[]>([]);
+
   useEffect(() => {
-    // Initialize dummy data on first load
-    db.initializeDummyData();
+    const fetchEvents = async () => {
+      try {
+        const response = await api.events.getUpcoming();
+        setUpcomingEvents(response.events.slice(0, 3));
+      } catch (error) {
+        console.error('Error fetching events:', error);
+      }
+    };
+    fetchEvents();
   }, []);
 
   const faculty: Faculty[] = [
@@ -27,8 +36,6 @@ const HomePage = () => {
       image: '/api/placeholder/200/200'
     }
   ];
-
-  const upcomingEvents = db.getEvents().filter(event => event.type === 'upcoming').slice(0, 3);
 
   return (
     <Layout>
