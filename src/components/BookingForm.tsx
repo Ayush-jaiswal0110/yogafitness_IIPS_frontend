@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Alert, AlertDescription } from '@/components/ui/alert';
-import { Loader2, CheckCircle } from 'lucide-react';
+import { Loader as Loader2, CircleCheck as CheckCircle } from 'lucide-react';
 import { Event, Booking } from '@/types';
 import { api } from '@/lib/api';
 import { AuthService } from '@/lib/auth';
