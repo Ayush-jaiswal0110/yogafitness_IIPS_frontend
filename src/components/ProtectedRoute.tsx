@@ -1,24 +1,31 @@
 import { ReactNode, useEffect, useState } from 'react';
+import { Navigate } from 'react-router-dom';
 import { AuthService } from '@/lib/auth';
 import AdminLogin from './AdminLogin';
 
 interface ProtectedRouteProps {
   children: ReactNode;
+  requireAdmin?: boolean;
 }
 
-const ProtectedRoute = ({ children }: ProtectedRouteProps) => {
+const ProtectedRoute = ({ children, requireAdmin = false }: ProtectedRouteProps) => {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [isAdmin, setIsAdmin] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    // Check authentication status
     const authenticated = AuthService.isAuthenticated();
+    const admin = AuthService.isAdmin();
     setIsAuthenticated(authenticated);
+    setIsAdmin(admin);
     setIsLoading(false);
   }, []);
 
   const handleLogin = () => {
-    setIsAuthenticated(true);
+    const authenticated = AuthService.isAuthenticated();
+    const admin = AuthService.isAdmin();
+    setIsAuthenticated(authenticated);
+    setIsAdmin(admin);
   };
 
   if (isLoading) {
@@ -33,7 +40,14 @@ const ProtectedRoute = ({ children }: ProtectedRouteProps) => {
   }
 
   if (!isAuthenticated) {
-    return <AdminLogin onLogin={handleLogin} />;
+    if (requireAdmin) {
+      return <AdminLogin onLogin={handleLogin} />;
+    }
+    return <Navigate to="/register" replace />;
+  }
+
+  if (requireAdmin && !isAdmin) {
+    return <Navigate to="/user/dashboard" replace />;
   }
 
   return <>{children}</>;

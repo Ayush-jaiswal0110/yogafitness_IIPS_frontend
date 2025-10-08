@@ -1,21 +1,34 @@
 import { useState } from 'react';
-import { Link, useLocation } from 'react-router-dom';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
-import { Menu, Heart, Users } from 'lucide-react';
+import { Menu, Heart, LogOut, User as UserIcon } from 'lucide-react';
+import { AuthService } from '@/lib/auth';
 
 const Navbar = () => {
   const [isOpen, setIsOpen] = useState(false);
   const location = useLocation();
+  const navigate = useNavigate();
+  const user = AuthService.getCurrentUser();
+  const isAuthenticated = AuthService.isAuthenticated();
 
   const navItems = [
     { name: 'Home', path: '/' },
     { name: 'Events', path: '/events' },
     { name: 'About', path: '/about' },
-    { name: 'Admin', path: '/admin' }
   ];
 
+  if (user?.role === 'admin') {
+    navItems.push({ name: 'Admin', path: '/admin' });
+  }
+
   const isActive = (path: string) => location.pathname === path;
+
+  const handleLogout = () => {
+    AuthService.logout();
+    navigate('/');
+    window.location.reload();
+  };
 
   return (
     <nav className="bg-white shadow-lg sticky top-0 z-50">
@@ -33,8 +46,8 @@ const Navbar = () => {
           </Link>
 
           {/* Desktop Navigation */}
-          <div className="hidden md:block">
-            <div className="ml-10 flex items-baseline space-x-4">
+          <div className="hidden md:flex items-center gap-2">
+            <div className="flex items-baseline space-x-2">
               {navItems.map((item) => (
                 <Link
                   key={item.name}
@@ -49,6 +62,30 @@ const Navbar = () => {
                 </Link>
               ))}
             </div>
+            {isAuthenticated ? (
+              <div className="flex items-center gap-2 ml-4">
+                <Link to="/user/dashboard">
+                  <Button variant="outline" size="sm">
+                    <UserIcon className="h-4 w-4 mr-2" />
+                    {user?.name}
+                  </Button>
+                </Link>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={handleLogout}
+                  className="text-red-600 hover:text-red-700 hover:bg-red-50"
+                >
+                  <LogOut className="h-4 w-4" />
+                </Button>
+              </div>
+            ) : (
+              <Link to="/register" className="ml-4">
+                <Button size="sm" className="bg-gradient-to-r from-orange-500 to-pink-500 hover:from-orange-600 hover:to-pink-600">
+                  Join Now
+                </Button>
+              </Link>
+            )}
           </div>
 
           {/* Mobile menu button */}
